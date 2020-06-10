@@ -35,7 +35,7 @@ namespace IA_Utils
                 for (int i = 0; i < subNodes.Count; i++)
                 {
                     newAbNode = alphaBeta(subNodes[i], depth - 1, alpha, beta, false);
-                    if (newAbNode.value > abNode.value) abNode = newAbNode;
+                    if (newAbNode.value > abNode.value) abNode = new alphaBetaNode { node = subNodes[i], value = newAbNode.value };
                     if (abNode.value > alpha) alpha = abNode.value;
                     if (alpha >= beta)
                     {
@@ -53,6 +53,7 @@ namespace IA_Utils
                                     nodesBeingCut.AddRange(subNodes[j].GetSubNodes());
                                 }
                                 int depthCopy = depth - 1;
+                                alphaBetaCuts += nodesBeingCut.Count;
                                 while (depthCopy > 0)
                                 {
                                     List<MinimaxNode> nodesBeingCutCopy = nodesBeingCut;
@@ -62,8 +63,8 @@ namespace IA_Utils
                                         nodesBeingCut.AddRange(nodesBeingCutCopy[j].GetSubNodes());
                                     }
                                     depthCopy--;
+                                    alphaBetaCuts += nodesBeingCut.Count;
                                 }
-                                alphaBetaCuts += nodesBeingCut.Count;
                             }
                         }
                         break;
@@ -78,7 +79,7 @@ namespace IA_Utils
                 for (int i = 0; i < subNodes.Count; i++)
                 {
                     newAbNode = alphaBeta(subNodes[i], depth - 1, alpha, beta, true);
-                    if (newAbNode.value < abNode.value) abNode = newAbNode;
+                    if (newAbNode.value < abNode.value) abNode = new alphaBetaNode { node = subNodes[i], value = newAbNode.value };
                     if (abNode.value < beta) beta = abNode.value;
                     if (beta <= alpha)
                     {
@@ -91,11 +92,13 @@ namespace IA_Utils
                             }
                             else
                             {
+                                alphaBetaCuts += subNodes.Count - i;
                                 for (int j = i + 1; j > subNodes.Count; j++)
                                 {
                                     nodesBeingCut.AddRange(subNodes[j].GetSubNodes());
                                 }
                                 int depthCopy = depth - 1;
+                                alphaBetaCuts += nodesBeingCut.Count;
                                 while (depthCopy > 0)
                                 {
                                     List<MinimaxNode> nodesBeingCutCopy = nodesBeingCut;
@@ -105,8 +108,8 @@ namespace IA_Utils
                                         nodesBeingCut.AddRange(nodesBeingCutCopy[j].GetSubNodes());
                                     }
                                     depthCopy--;
+                                    alphaBetaCuts += nodesBeingCut.Count;
                                 }
-                                alphaBetaCuts += nodesBeingCut.Count;
                             }
                         }
                         break;
