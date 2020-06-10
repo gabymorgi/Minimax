@@ -1,57 +1,118 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace IA_Utils
 {
     public static class Minimax
     {
-        public static MinimaxNode GetBestNode(List<MinimaxNode> nodes, int depth)
+        public static int alphaBetaCuts = 0;
+        public static bool countAlphaBetaCuts = false;
+
+        private struct alphaBetaNode
         {
-            if (nodes == null || nodes.Count == 0) return null;
-            int actPoints;
-            int maxPoints = int.MinValue;
-            int maxIndex = 0;
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                actPoints = alphaBeta(nodes[i], depth - 1, int.MinValue, int.MaxValue, false);
-                if (actPoints > maxPoints)
-                {
-                    maxPoints = actPoints;
-                    maxIndex = i;
-                }
-            }
-            return nodes[maxIndex];
+            public MinimaxNode node;
+            public int value;
+        }
+        public static MinimaxNode GetBestNode(MinimaxNode node, int depth)
+        {
+            alphaBetaCuts = 0;
+            if (node == null) return null;
+            alphaBetaNode result = alphaBeta(node, depth, int.MinValue, int.MaxValue, true);
+            return result.node;
         }
 
-        private static int alphaBeta(MinimaxNode node, int depth, int alpha, int beta, bool maximizingPlayer)
+        private static alphaBetaNode alphaBeta(MinimaxNode node, int depth, int alpha, int beta, bool maximizingPlayer)
         {
             if (node.IsTerminal() || depth == 0)
             {
-                return node.GetHeuristic();
+                return new alphaBetaNode { node = node, value = node.GetHeuristic() };
             }
             List<MinimaxNode> subNodes = node.GetSubNodes();
             if (maximizingPlayer)
             {
-                int value = int.MinValue;
+                alphaBetaNode abNode = new alphaBetaNode { value = int.MinValue };
+                alphaBetaNode newAbNode;
                 for (int i = 0; i < subNodes.Count; i++)
                 {
-                    int newValue = alphaBeta(subNodes[i], depth - 1, alpha, beta, false);
-                    if (newValue > value) value = newValue;
-                    if (value > alpha) alpha = value;
-                    if (alpha >= beta) break;
+                    newAbNode = alphaBeta(subNodes[i], depth - 1, alpha, beta, false);
+                    if (newAbNode.value > abNode.value) abNode = newAbNode;
+                    if (abNode.value > alpha) alpha = abNode.value;
+                    if (alpha >= beta)
+                    {
+                        if (countAlphaBetaCuts)
+                        {
+                            List<MinimaxNode> nodesBeingCut = new List<MinimaxNode>();
+                            if (depth == 1)
+                            {
+                                alphaBetaCuts += subNodes.Count - i;
+                            }
+                            else
+                            {
+                                for (int j = i + 1; j > subNodes.Count; j++)
+                                {
+                                    nodesBeingCut.AddRange(subNodes[j].GetSubNodes());
+                                }
+                                int depthCopy = depth - 1;
+                                while (depthCopy > 0)
+                                {
+                                    List<MinimaxNode> nodesBeingCutCopy = nodesBeingCut;
+                                    nodesBeingCut = new List<MinimaxNode>();
+                                    for (int j = 0; j > nodesBeingCutCopy.Count; j++)
+                                    {
+                                        nodesBeingCut.AddRange(nodesBeingCutCopy[j].GetSubNodes());
+                                    }
+                                    depthCopy--;
+                                }
+                                alphaBetaCuts += nodesBeingCut.Count;
+                            }
+                        }
+                        break;
+                    }
                 }
-                return value;
+                return abNode;
             }
             else
             {
-                int value = int.MaxValue;
+                alphaBetaNode abNode = new alphaBetaNode { value = int.MaxValue };
+                alphaBetaNode newAbNode;
                 for (int i = 0; i < subNodes.Count; i++)
                 {
-                    int newValue = alphaBeta(subNodes[i], depth - 1, alpha, beta, true);
-                    if (newValue < value) value = newValue;
-                    if (value < beta) beta = value;
-                    if (alpha >= beta) break;
+                    newAbNode = alphaBeta(subNodes[i], depth - 1, alpha, beta, true);
+                    if (newAbNode.value < abNode.value) abNode = newAbNode;
+                    if (abNode.value < beta) beta = abNode.value;
+                    if (beta <= alpha)
+                    {
+                        if (countAlphaBetaCuts)
+                        {
+                            List<MinimaxNode> nodesBeingCut = new List<MinimaxNode>();
+                            if (depth == 1)
+                            {
+                                alphaBetaCuts += subNodes.Count - i;
+                            }
+                            else
+                            {
+                                for (int j = i + 1; j > subNodes.Count; j++)
+                                {
+                                    nodesBeingCut.AddRange(subNodes[j].GetSubNodes());
+                                }
+                                int depthCopy = depth - 1;
+                                while (depthCopy > 0)
+                                {
+                                    List<MinimaxNode> nodesBeingCutCopy = nodesBeingCut;
+                                    nodesBeingCut = new List<MinimaxNode>();
+                                    for (int j = 0; j > nodesBeingCutCopy.Count; j++)
+                                    {
+                                        nodesBeingCut.AddRange(nodesBeingCutCopy[j].GetSubNodes());
+                                    }
+                                    depthCopy--;
+                                }
+                                alphaBetaCuts += nodesBeingCut.Count;
+                            }
+                        }
+                        break;
+                    }
                 }
-                return value;
+                return abNode;
             }
         }
     }
