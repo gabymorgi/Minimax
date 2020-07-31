@@ -8,10 +8,10 @@ namespace IA_Utils
         public static Heuristic GetBestNode(MinimaxNode node, int depth)
         {
             if (node == null) return null;
-            return alphaBeta(node, depth, int.MinValue, int.MaxValue, true);
+            return alphaBeta(node, depth, double.MinValue, double.MaxValue, true);
         }
 
-        private static Heuristic alphaBeta(MinimaxNode node, int depth, int alpha, int beta, bool maximizingPlayer)
+        private static Heuristic alphaBeta(MinimaxNode node, int depth, double alpha, double beta, bool maximizingPlayer)
         {
             if (node.IsTerminal() || depth < 1)
             {
@@ -20,7 +20,7 @@ namespace IA_Utils
             List<MinimaxNode> subNodes = node.GetSubNodes();
             if (maximizingPlayer)
             {
-                Heuristic abNode = new Heuristic { value = int.MinValue };
+                Heuristic abNode = new Heuristic { value = double.MinValue };
                 Heuristic newAbNode;
                 for (int i = 0; i < subNodes.Count; i++)
                 {
@@ -33,7 +33,7 @@ namespace IA_Utils
             }
             else
             {
-                Heuristic abNode = new Heuristic { value = int.MaxValue };
+                Heuristic abNode = new Heuristic { value = double.MaxValue };
                 Heuristic newAbNode;
                 for (int i = 0; i < subNodes.Count; i++)
                 {
@@ -50,13 +50,13 @@ namespace IA_Utils
     public class Heuristic
     {
         public MinimaxNode node;
-        public int value;
+        public double value;
     }
 
     public interface MinimaxNode
     {
         List<MinimaxNode> GetSubNodes();
         bool IsTerminal();
-        int GetHeuristic();
+        double GetHeuristic();
     }
 }
